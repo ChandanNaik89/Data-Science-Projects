@@ -1,0 +1,99 @@
+### Muliple regression
+import pandas as pd
+from sklearn import linear_model
+import statsmodels.api as sm
+data_final = data_final.rename(columns={'loan_amnt ': 'loan_amnt', 'total revol_bal': 'total_revol_bal'})
+
+feature_cols1 = data_final.drop(['total_revol_bal','terms','last_week_pay','grade','delinq_2yrs','sub_grade','State','member_id ','debt_income_ratio'], axis=1)
+feature_cols = list(feature_cols1)
+
+
+X=data_final[feature_cols]
+Y=data_final[["total_revol_bal"]]
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=0)
+
+
+# with sklearn
+regr = linear_model.LinearRegression()
+regr.fit(X_train, y_train)
+
+print('Intercept: \n', regr.intercept_)
+print('Coefficients: \n', regr.coef_)
+
+# with statsmodels
+model = sm.OLS(y_train, X_train).fit()
+predictions = model.predict(X_train) 
+ 
+print(print_model)
+
+Y["rf_pred"] = model.predict(X)
+
+errors = abs(y_pred - y_test)
+y_pred = model.predict(X_test)
+
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+
+
+
+data_final.columns.tolist() 
+### Splitting the data into train and test data 
+data_final = data_final.rename(columns={'loan_amnt ': 'loan_amnt', 'total revol_bal': 'total_revol_bal'})
+from sklearn.model_selection import train_test_split
+data_train,data_test  = train_test_split(data_final,test_size = 0.3) # 30% size
+
+# preparing the model on train data 
+
+model_train = smf.ols("total_revol_bal~loan_amnt+Rate_of_intrst+annual_inc+debt_income_ratio+inq_last_6mths+delinq_2yrs+numb_credit+pub_rec+total_credits+total_rec_int+recoveries+grade+sub_grade+tot_curr_bal+terms+Experience+home_ownership+verification_status+purpose+State+application_type+last_week_pay",data = data_train).fit() 
+model_train.summary()
+
+# train_data prediction
+train_pred = model_train.predict(data_train)
+
+# train residual values 
+train_resid  = train_pred - data_train.total_revol_bal
+
+# RMSE value for train data 
+train_rmse = np.sqrt(np.mean(train_resid*train_resid))
+
+# prediction on test data set 
+test_pred = model_train.predict(data_test)
+
+# test residual values 
+test_resid  = test_pred - data_test.total_revol_bal
+
+# RMSE value for test data 
+test_rmse = np.sqrt(np.mean(test_resid*test_resid))
+
+rsq_hp = smf.ols("total_revol_bal~loan_amnt+Rate_of_intrst+annual_inc+debt_income_ratio+delinq_2yrs+numb_credit+pub_rec+total_credits+total_rec_int+recoveries+tot_curr_bal+terms+Experience+home_ownership+verification_status+application_type+last_week_pay",data = data_train).fit().rsquared  
+vif_hp = 1/(1-rsq_hp) 
+
+plt.scatter(data_test.total_revol_bal,test_pred,c="r");plt.xlabel("observed_values");plt.ylabel("fitted_values")
+
+plt.scatter(data_train.total_revol_bal,train_pred,c="r");plt.xlabel("observed_values");plt.ylabel("fitted_values")
+
+
+metrics.explained_variance_score(data_test['total_revol_bal'],test_pred)
+
+import seaborn as sns
+plt.figure(figsize=(5, 7))
+ax = sns.distplot(data_test['total_revol_bal'], hist=False, color="r", label="Actual Value")
+sns.distplot(test_pred, hist=False, color="b", label="Fitted Values" , ax=ax)
+plt.title('Actual vs Fitted Values for Price')
+plt.xlabel('total revolving balance ')
+plt.show()
+plt.close()
+
+
+#visualization
+plt.scatter(cars.new.Profit, pred_final,c="r"); plt.xlabel("Observed values"); plt.ylabel("Fitted Values")
+
+df = pd.DataFrame({'Actual': data_train.total_revol_bal, 'Predicted' : train_pred})
+df1 = df.head(30)
+df1.plot(kind= 'bar', figsize=(16,10))
+sns.distplot((y_test-y_pred))
