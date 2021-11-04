@@ -1,0 +1,237 @@
+import statsmodels.formula.api as smf
+from sklearn.metrics import classification_report
+
+model=smf.ols("total_revol_bal~loan_amnt",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~Rate_of_intrst",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~annual_inc",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~debt_income_ratio",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~delinq_2yrs",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~numb_credit",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~total_credits",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~total_rec_int",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~total_rec_late_fee",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~recoveries",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~tot_colle_amt",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~tot_curr_bal",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~home_ownership",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~application_type",data=data_final).fit()
+model.summary()
+model=smf.ols("total_revol_bal~pub_rec",data=data_final).fit()
+model.summary()
+
+
+### multi linear
+ml_v=smf.ols("total_revol_bal~loan_amnt+Rate_of_intrst+annual_inc+debt_income_ratio+delinq_2yrs+numb_credit+pub_rec+total_revol_bal+total_credits+total_rec_int+recoveries+tot_curr_bal+terms+Experience+home_ownership+verification_status+application_type+last_week_pay",data = data_final).fit() 
+ml_v.summary()
+ml_v.params
+
+import statsmodels.api as sm
+sm.graphics.influence_plot(ml_v)
+
+
+### random forest
+data_final = data_final.rename(columns={'loan_amnt ': 'loan_amnt', 'total revol_bal': 'total_revol_bal'})
+data_final.shape
+cols = list(data_final)
+cols.insert(24, cols.pop(cols.index('total_revol_bal')))
+cols
+data_final = data_final.ix[:, cols]
+
+
+X = data_final.drop('total_revol_bal',axis=1)
+y = data_final['total_revol_bal']
+
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+
+from sklearn.ensemble import RandomForestRegressor
+regressor = RandomForestRegressor(n_estimators = 300, random_state = 30, oob_score=True)
+regressor.fit(X_train, y_train)
+
+y_pred = regressor.predict(X_test)
+
+df=pd.DataFrame({'Actual':y_test, 'Predicted':y_pred})
+df
+
+from sklearn import metrics
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+# Calculate the absolute errors
+errors = abs(y_pred - y_test)
+# Print out the mean absolute error (mae)
+print('Mean Absolute Error:', round(np.mean(errors), 2), 'degrees.')
+
+# Calculate mean absolute percentage error (MAPE)
+mape = 100 * (errors / y_test)
+# Calculate and display accuracy
+accuracy = 100 - np.mean(mape)
+print('Accuracy:', round(accuracy, 2), '%.')
+
+
+import seaborn as sns
+plt.figure(figsize=(5, 7))
+ax = sns.distplot(y, hist=False, color="r", label="Actual Value")
+sns.distplot(y_pred, hist=False, color="b", label="Fitted Values" , ax=ax)
+
+plt.title('Actual vs Fitted Values for Price')
+plt.show()
+plt.close()
+
+Tree = regressor.estimators_[5]
+# Export the image to a dot file
+from sklearn import tree
+plt.figure(figsize=(25,15))
+tree.plot_tree(Tree,filled=True, 
+              rounded=True, 
+              fontsize=14);
+
+
+
+### dtree
+data_final = data_final.rename(columns={'loan_amnt ': 'loan_amnt', 'total revol_bal': 'total_revol_bal'})
+               
+X = data_final.drop(['total_revol_bal','application_type','State','member_id ','pub_rec','last_week_pay','recoveries','terms','verification_status','delinq_2yrs','debt_income_ratio'],axis=1)
+data_final.columns.tolist() 
+y = data_final['total_revol_bal']
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)               
+
+from sklearn.tree import DecisionTreeRegressor
+regressor = DecisionTreeRegressor(max_depth = 7)
+regressor.fit(X_train, y_train) 
+
+y_pred = regressor.predict(X_test)
+
+df=pd.DataFrame({'Actual':y_test, 'Predicted':y_pred})
+df 
+
+errors = abs(y_pred - y_test)
+# Print out the mean absolute error (mae)
+print('Mean Absolute Error:', round(np.mean(errors), 2), 'degrees.')
+
+# Calculate mean absolute percentage error (MAPE)
+mape = 100 * (errors / y_test)
+# Calculate and display accuracy
+accuracy = 100 - np.mean(mape)
+print('Accuracy:', round(accuracy, 2), '%.')            
+               
+import seaborn as sns
+plt.figure(figsize=(5, 7))
+ax = sns.distplot(y, hist=False, color="r", label="Actual Value")
+sns.distplot(y_pred, hist=False, color="b", label="Fitted Values" , ax=ax)
+plt.title('Actual vs Fitted Values for Price')
+plt.xlabel('Price (in dollars)')
+plt.ylabel('Proportion of Cars')
+plt.show()
+plt.close()
+
+
+
+## Random forest Actual
+
+data_final = data_final.rename(columns={'loan_amnt ': 'loan_amnt', 'total revol_bal': 'total_revol_bal'})
+data_final.shape
+cols = list(data_final)
+cols.insert(24, cols.pop(cols.index('total_revol_bal')))
+cols
+data_final = data_final.ix[:, cols]
+
+data_final.isnull().sum()
+data_final["total_revol_bal"].max()
+data_final["total_revol_bal"].mean()
+data_final["total_revol_bal"].min()
+data_final.head()
+
+data_final["output"] = pd.cut(data_final.total_revol_bal, bins = [3418.8,14568.5,33478.0], labels =['better','Good'])
+data_final['output'].unique()
+data_final["output"].isnull().sum()
+
+feature_cols1 = data_final.drop(['output','total_revol_bal'], axis=1)
+feature_cols = list(feature_cols1)
+
+
+iX=data_final[feature_cols]
+iy=data_final[["output"]]
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split 
+X_train, X_test, y_train, y_test = train_test_split(iX, iy, test_size = 0.2, random_state=0)
+
+rfiris = RandomForestClassifier(n_jobs=4,oob_score=True,n_estimators=100,criterion="entropy")
+rfiris.fit(X_train,y_train)
+predictions = rfiris.predict(iX)
+
+a = pd.DataFrame({'feature':feature_cols, 'importance':rfiris.feature_importances_})
+
+feature_importance = rfiris.feature_importances_
+features = feature_cols
+
+
+plt.figure(figsize=(16, 6))
+plt.yscale('log', nonposy='clip')
+plt.bar(range(len(feature_importance)), feature_importance, align='center')
+plt.xticks(range(len(feature_importance)), features, rotation='vertical')
+plt.title('Feature importance')
+plt.ylabel('Importance')
+plt.xlabel('Features')
+plt.show()
+
+# Get numerical feature importances
+importances = list(rfiris.feature_importances_)
+
+iy["rf_pred"] = rfiris.predict(iX)
+
+pd.crosstab(iy['output'],iy['rf_pred'])
+print("Accuracy",(510901+338294)/(17359+510901+338294+20825)*100)
+
+from sklearn.metrics import confusion_matrix
+confusion_matrix(data_final["output"],data_final["rf_pred"])  
+
+
+### test data
+rfiris.fit(X_test,y_test)
+iy["rf_pred_test"] = rfiris.predict(iX)
+
+aaa = pd.DataFrame({'feature':feature_cols, 'importance':rfiris.feature_importances_})
+
+feature_importance = rfiris.feature_importances_
+features = feature_cols
+
+
+plt.figure(figsize=(16, 6))
+plt.yscale('log', nonposy='clip')
+plt.bar(range(len(feature_importance)), feature_importance, align='center')
+plt.xticks(range(len(feature_importance)), features, rotation='vertical')
+plt.title('Feature importance')
+plt.ylabel('Importance')
+plt.xlabel('Features')
+plt.show()
+
+pd.crosstab(iy['output'],iy['rf_pred_test'])
+print("Accuracy",(459103+274129)/(69157+459103+274129+84990)*100)
+
+
+rfiris.oob_score_ 
+rfiris.n_outputs_ 
+rfiris.n_features_
+
+
+pd.crosstab(data_final['output'],data_final['rf_pred'])
+print("Accuracy",(606616+154017)/(44589+606616+154017+82157)*100)
