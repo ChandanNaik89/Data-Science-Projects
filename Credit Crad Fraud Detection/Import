@@ -1,0 +1,10 @@
+Importing the reuried libraries
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+Importing the data set
+credit = pd.read_csv("D:/Datasets/creditcard.csv")
+Exploratory Data Analysis
+## 1.) Checking the first 10 cloumns and rows of data set ##
+credit.head(10)
